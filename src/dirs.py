@@ -1,0 +1,5 @@
+PLAYER_DIR = "../data/processed/players.csv"
+EVENTS_DIR = "../data/processed/events.csv"
+MATCHES_DIR = "../data/processed/matches_results.csv"
+RANKINGS_DIR = "../data/processed/rankings.csv"
+MODEL_DIR = "../data/models/"

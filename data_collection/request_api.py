@@ -29,7 +29,8 @@ def get_data(url, region):
         with open(f"../data/{url.split('/')[-1]}.json", "w") as f:
             json.dump(data, f, indent=4)
 
-if __name__ == '__main__':
+
+def main():
     for url in URLS:
         if url == URLS[0]:
             for region in REGIONS:
@@ -37,3 +38,6 @@ if __name__ == '__main__':
         else:
             get_data(url, None)
 
+
+if __name__ == '__main__':
+    main()

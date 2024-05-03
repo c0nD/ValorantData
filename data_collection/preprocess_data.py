@@ -111,7 +111,7 @@ def combine_data():
     }
 
 
-def expand_team_name(df):
+def expand_team_name(df, user_agent="Mozilla/5.0"):
     """
     This method uses web scraping to get the full team name for a given player and ensures proper data type handling.
     """
@@ -119,12 +119,11 @@ def expand_team_name(df):
         df['team_name'] = np.nan
     df['team_name'] = df['team_name'].astype(str)
 
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
     headers = {'User-Agent': user_agent}
     
     for index, row in df.iterrows():
         try:
-            time.sleep(0.3)
+            time.sleep(0.1)
             url = f"https://{row['player_link']}"
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
@@ -147,6 +146,52 @@ def expand_team_name(df):
     return df
 
 
+def final_cleaning():
+    """
+    Performs the final cleaning of the data
+    """
+    players_df = pd.read_csv("../data/processed/players.csv")
+    rankings_df = pd.read_csv("../data/processed/rankings.csv")
+    events_df = pd.read_csv("../data/processed/events.csv")  # not used for now
+    matches_results_df = pd.read_csv("../data/processed/matches_results.csv")
+    
+    # Cleaning Players dataset
+    if players_df['headshot_percentage'].dtype == object:
+        players_df['headshot_percentage'] = players_df['headshot_percentage'].str.rstrip('%').astype(float) / 100
+    if players_df['clutch_success_percentage'].dtype == object:
+        players_df['clutch_success_percentage'] = players_df['clutch_success_percentage'].str.rstrip('%').astype(float) / 100
+    players_df['rating'] = players_df['rating'].fillna(players_df['rating'].mean())
+    for col in players_df.columns:
+        if players_df[col].dtype == 'float64':
+            players_df[col] = players_df[col].fillna(players_df[col].mean())
+
+    # Cleaning Rankings dataset
+    rankings_df[['wins', 'losses']] = rankings_df['record'].str.extract('(\d+)–(\d+)').astype(int)
+    rankings_df['win_streak_count'] = rankings_df['win_streak'].str.extract('(\d+)').fillna(0).astype(int)
+    rankings_df['is_winning_streak'] = rankings_df['win_streak'].str.contains('W')
+
+    # Cleaning Matches Results dataset
+    if matches_results_df['match_time'].dtype == object:
+        matches_results_df['match_time'] = pd.to_datetime(matches_results_df['match_time'], errors='coerce')
+
+    # Match result (*relative to team one)
+    def determine_match_result(row):
+        if row['team_one_score'] > row['team_two_score']:
+            return 'Win'
+        elif row['team_one_score'] < row['team_two_score']:
+            return 'Lose'
+        else:
+            return 'Draw'
+    matches_results_df['match_result'] = matches_results_df.apply(determine_match_result, axis=1)
+    
+    # Write back
+    players_df.to_csv("../data/processed/players.csv", index=False)
+    rankings_df.to_csv("../data/processed/rankings.csv", index=False)
+    events_df.to_csv("../data/processed/events.csv", index=False)
+    matches_results_df.to_csv("../data/processed/matches_results.csv", index=False)
+
+
+
 def main():
     data = combine_data()
     print(data["rankings"].head())
@@ -158,7 +203,8 @@ def main():
     data["players"].to_csv("../data/processed/players.csv", index=False)
     data["events"].to_csv("../data/processed/events.csv", index=False)
     data["matches_results"].to_csv("../data/processed/matches_results.csv", index=False)
-
+    
+    final_cleaning()  # not very efficient but idrc
     
 if __name__ == '__main__':
     main()

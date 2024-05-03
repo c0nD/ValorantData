@@ -21,7 +21,7 @@ def get_players():
     """
     This method reads the players json file and returns a dictionary with the players
     """
-    with open ("../data/players.json", "r") as f:
+    with open ("../data/unprocessed/players.json", "r") as f:
         data = json.load(f)
     return data
 
@@ -30,7 +30,7 @@ def get_events():
     """
     This method reads the events json file and returns a dictionary with the events
     """
-    with open ("../data/events.json", "r") as f:
+    with open ("../data/unprocessed/events.json", "r") as f:
         data = json.load(f)
     return data
 
@@ -39,7 +39,7 @@ def get_matches_upcoming():
     """
     This method reads the upcoming matches json file and returns a dictionary with the upcoming matches
     """
-    with open ("../data/matches_upcoming.json", "r") as f:
+    with open ("../data/unprocessed/matches_upcoming.json", "r") as f:
         data = json.load(f)
     return data
 
@@ -48,7 +48,7 @@ def get_matches_results():
     """
     This method reads the results matches json file and returns a dictionary with the results matches
     """
-    with open ("../data/matches_results.json", "r") as f:
+    with open ("../data/unprocessed/matches_results.json", "r") as f:
         data = json.load(f)
     return data
 
